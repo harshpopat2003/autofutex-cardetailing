@@ -1,1 +1,1 @@
-# autofutex-cardetailing
+# autofutex-cardetailing-demo
