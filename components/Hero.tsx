@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import Cta from "./Cta";
+import { asset } from "@/lib/asset";
 import { hero, shop, whatsapp } from "@/lib/content";
 import { gsap, prefersReducedMotion, scrollTo, splitWordsIn } from "@/lib/motion";
 
@@ -187,7 +188,7 @@ function BayVideo() {
       <div className="relative aspect-[5/4] w-full overflow-hidden rounded-[10px] md:aspect-video">
         <video
           ref={ref}
-          src="/assets/reel-workshop.mp4"
+          src={asset("/assets/reel-workshop.mp4")}
           className="h-full w-full object-cover"
           style={{ objectPosition: "50% 34%" }}
           autoPlay

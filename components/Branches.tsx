@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import Cta from "./Cta";
+import { asset } from "@/lib/asset";
 import { branches, hours, shop } from "@/lib/content";
 import { parallax, revealOnScroll, splitLinesIn, tilt3d } from "@/lib/motion";
 
@@ -52,7 +53,7 @@ export default function Branches() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   data-parallax
-                  src={b.image}
+                  src={asset(b.image)}
                   alt=""
                   className="h-[112%] w-full object-cover"
                   loading="lazy"

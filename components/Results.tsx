@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
+import { asset } from "@/lib/asset";
 import { proof, shop } from "@/lib/content";
 import { gsap, prefersReducedMotion, revealOnScroll, scrubCount, splitLinesIn } from "@/lib/motion";
 
@@ -209,7 +210,7 @@ function QuoteRail() {
             <figcaption className="mt-6 flex items-center gap-3 border-t border-edge pt-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={q.image}
+                src={asset(q.image)}
                 alt=""
                 className="size-10 shrink-0 rounded-full object-cover"
                 loading="lazy"

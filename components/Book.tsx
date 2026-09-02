@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import Cta from "./Cta";
+import { asset } from "@/lib/asset";
 import { book, shop, whatsapp } from "@/lib/content";
 import { prefersReducedMotion, revealOnScroll, splitLinesIn } from "@/lib/motion";
 
@@ -78,7 +79,7 @@ export default function Book() {
           <div className="relative min-h-[16rem] p-8 md:p-10">
             <video
               ref={bay}
-              src="/assets/reel-ppf.mp4"
+              src={asset("/assets/reel-ppf.mp4")}
               className="absolute inset-0 h-full w-full object-cover"
               style={{ objectPosition: "50% 26%" }}
               autoPlay

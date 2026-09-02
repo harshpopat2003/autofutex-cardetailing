@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import Cta from "./Cta";
+import { asset } from "@/lib/asset";
 import { services, whatsapp } from "@/lib/content";
 import { gsap, prefersReducedMotion, revealOnScroll } from "@/lib/motion";
 
@@ -153,8 +154,8 @@ export default function Protection() {
           {services.map((s, i) => (
             <div key={s.n} data-pair className="absolute inset-0 h-screen w-full">
               <div className="shell flex h-full flex-row items-center justify-between">
-                <Panel src={s.left} tag={s.short} side="left" />
-                <Panel src={s.right} tag={s.n} side="right" />
+                <Panel src={asset(s.left)} tag={s.short} side="left" />
+                <Panel src={asset(s.right)} tag={s.n} side="right" />
               </div>
             </div>
           ))}
@@ -167,7 +168,7 @@ export default function Protection() {
           <article key={s.n} className="panel p-5">
             <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-lg sm:aspect-[4/3]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.left} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <img src={asset(s.left)} alt="" className="h-full w-full object-cover" loading="lazy" />
             </div>
             <ServiceCopy service={s} align="left" />
           </article>
