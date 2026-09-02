@@ -1,0 +1,619 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+/* ---------------------------------------------------------------
+   AutoFutex — design tokens
+
+   The concept is a light tunnel: the inspection bay a detailer
+   actually works in. A near-black room, long linear LED bars, and
+   polished paint that reads as pure black cut by hard white streaks.
+   Every surface here is a panel; every highlight is a light bar.
+
+   That gives the palette its shape. The ground is a blue-shifted
+   black — car black, not UI black. Neutrals are chrome and steel
+   rather than grey, so text sits on the page like brushed metal.
+
+   One saturated colour, spent in one place: ember. It is the warm
+   sodium light of a workshop against the cold LED of the tunnel,
+   and it appears only on things you can act on. `flare` is its cold
+   counterweight and belongs to the light bars alone — never to text.
+----------------------------------------------------------------*/
+@theme {
+  --color-lacquer: #050607;
+  --color-panel: #0c0e11;
+  --color-panel-2: #14171b;
+  --color-panel-3: #1b1f25;
+  --color-edge: #23272d;
+  --color-edge-lit: #343941;
+
+  --color-white-hot: #f7f8fa;
+  --color-chrome: #cdd3db;
+  --color-steel: #98a1ac;
+  --color-slate: #646c77;
+
+  --color-ember: #ff5f14;
+  --color-ember-lit: #ff9354;
+  --color-ember-deep: #c23c00;
+
+  /* Cold LED. Light bars and specular sweeps only. */
+  --color-flare: #bfe4ff;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Curves come from the animate skill's table — never hand-rolled. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Lenis owns the scroll; native smoothing would tear against it. */
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  /* `clip`, not `hidden`: hidden turns the root into a scroll container
+     and kills every sticky section on the page. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-lacquer);
+    color: var(--color-chrome);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Apple's typography rule: tracking is size-specific, so it is set
+     per step in the ramp below rather than once here. Only the shared
+     family and weight live at this level. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-white-hot);
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-ember);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  /* The scrollbar is part of a dark room too. */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-lacquer);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-edge);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-edge-lit);
+  }
+}
+
+@layer components {
+  /* ---- Type ramp -------------------------------------------------
+     Tracking tightens as size grows and leading tightens with it —
+     one value across the ramp is wrong at both ends. */
+
+  /* The hero headline lives in a 7-of-12 column inside an 82rem shell,
+     so its measure stops growing at ~745px however wide the window
+     gets. The cap is set from that, not from the viewport. */
+  .t-hero {
+    font-size: clamp(2.75rem, 7.6vw, 7.25rem);
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+  }
+
+  .t-1 {
+    font-size: clamp(2.25rem, 6vw, 5.5rem);
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+  }
+
+  .t-2 {
+    font-size: clamp(1.75rem, 3.6vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: -0.028em;
+  }
+
+  .t-3 {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .lede {
+    font-size: clamp(1.0625rem, 1.35vw, 1.3125rem);
+    line-height: 1.5;
+    letter-spacing: -0.011em;
+    color: var(--color-steel);
+    text-wrap: pretty;
+  }
+
+  .body-sm {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    color: var(--color-steel);
+    text-wrap: pretty;
+  }
+
+  /* Small text wants positive tracking — the inverse of the display
+     sizes above. This is the spec-sheet voice: branch names, microns,
+     section numbers. */
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-slate);
+    font-weight: 500;
+  }
+
+  .mono-sm {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-slate);
+  }
+
+  /* Same voice, but case-preserving. Unit symbols are case-sensitive:
+     uppercasing "µm" yields "Mm", which is a different measurement. */
+  .mono-unit {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--color-slate);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Layout ---------------------------------------------------- */
+
+  .shell {
+    width: min(100% - 2.5rem, 82rem);
+    margin-inline: auto;
+  }
+
+  .shell-narrow {
+    width: min(100% - 2.5rem, 60rem);
+    margin-inline: auto;
+  }
+
+  /* ---- Surfaces --------------------------------------------------
+     A panel is a piece of coated bodywork: dark, slightly lifted, and
+     catching a single hard highlight along its top edge. */
+
+  .panel {
+    background: linear-gradient(180deg, var(--color-panel-2) 0%, var(--color-panel) 100%);
+    border: 1px solid var(--color-edge);
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* The light catching the top edge. One pixel, but it is the whole
+     difference between a card and a panel. */
+  .panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-flare) 45%, transparent) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Translucent chrome — content scrolls underneath, per Apple's
+     material rule. Never stacked on another translucent surface. */
+  .glass {
+    background: color-mix(in oklab, var(--color-lacquer) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid color-mix(in oklab, var(--color-edge-lit) 70%, transparent);
+  }
+
+  /* ---- The light bar ---------------------------------------------
+     The signature element. A long specular streak, the shape of the
+     reflection an LED tube leaves on polished paint. It is decorative,
+     so it is inert to the pointer and vanishes under reduced motion. */
+
+  .streak {
+    position: absolute;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-flare) 30%, transparent) 35%,
+      color-mix(in oklab, #fff 55%, transparent) 50%,
+      color-mix(in oklab, var(--color-flare) 30%, transparent) 65%,
+      transparent 100%
+    );
+    opacity: 0.5;
+  }
+
+  /* A warm one, for the ember side of the room. */
+  .streak-ember {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-ember) 40%, transparent) 50%,
+      transparent 100%
+    );
+  }
+
+  /* ---- Buttons ---------------------------------------------------
+     A pill whose fill is parked off to the right, leaving just a 2rem
+     circle showing behind the icon. On hover the fill slides across and
+     the two colours trade places.
+
+     The circle is not a separate element — it is the visible sliver of
+     the fill — which is why the hover reads as one surface moving
+     rather than two things changing at once.
+
+     Press feedback lives on `:active`, so it lands on pointer-down
+     rather than waiting for the click to resolve. */
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.125rem;
+    padding-left: 1.25rem;
+    border-radius: 9999px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1;
+    cursor: pointer;
+    overflow: hidden;
+    isolation: isolate;
+    white-space: nowrap;
+    transition: transform 120ms var(--ease-out);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-label {
+    position: relative;
+    z-index: 10;
+    flex: 1 1 auto;
+    min-width: 0;
+    transition: color 500ms var(--ease-out);
+  }
+
+  .btn-icon {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    transition: color 500ms var(--ease-out);
+  }
+
+  .btn-fill {
+    position: absolute;
+    inset: 0.125rem;
+    z-index: 0;
+    border-radius: 9999px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Parked so exactly one icon's width peeks out on the right. */
+  .btn-fill > span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    transform: translateX(calc(100% - 2rem));
+    transition: transform 500ms var(--ease-out);
+  }
+
+  .btn-primary {
+    background: var(--color-ember);
+    color: #180700;
+  }
+
+  .btn-primary .btn-fill > span {
+    background: var(--color-panel-2);
+  }
+
+  .btn-primary .btn-icon {
+    color: var(--color-white-hot);
+  }
+
+  .btn-ghost {
+    background: var(--color-panel-2);
+    color: var(--color-white-hot);
+    box-shadow: inset 0 0 0 1px var(--color-edge-lit);
+  }
+
+  .btn-ghost .btn-fill > span {
+    background: var(--color-ember);
+  }
+
+  .btn-ghost .btn-icon {
+    color: #180700;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover .btn-fill > span {
+      transform: translateX(0);
+    }
+
+    .btn-primary:hover .btn-label {
+      color: var(--color-white-hot);
+    }
+
+    .btn-ghost:hover .btn-label {
+      color: #180700;
+    }
+  }
+
+  /* Square icon button — the menu toggle. Not a CTA, so it keeps its
+     own shape rather than pretending to be a pill. */
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    background: var(--color-panel-2);
+    color: var(--color-white-hot);
+    box-shadow: inset 0 0 0 1px var(--color-edge-lit);
+    cursor: pointer;
+    transition:
+      transform 120ms var(--ease-out),
+      background-color 200ms ease;
+  }
+
+  .icon-btn:active {
+    transform: scale(0.94);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .icon-btn:hover {
+      background: var(--color-panel-3);
+    }
+  }
+
+  /* ---- 3D scene --------------------------------------------------
+     Perspective belongs to the scene, not to each card. One shared
+     vanishing point is what separates a room from stacked divs. */
+
+  .scene-3d {
+    perspective: 1400px;
+    perspective-origin: 50% 50%;
+  }
+
+  .layer-3d {
+    transform-style: preserve-3d;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  /* ---- Top light --------------------------------------------------
+     The warm haze over the first screen, as if the tunnel's lamps were
+     just out of frame above it. Layered radial gradients rather than a
+     blurred blob, so it stays a wash instead of a visible disc.
+
+     Deliberately static. A slow brightness oscillation across a surface
+     this large is the exact case the reduced-motion guidance calls out,
+     and this is decoration — it has no state to report. */
+
+  .top-light {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: min(82vh, 60rem);
+    pointer-events: none;
+    /* Both gradients are centred well above the viewport, so what
+       lands on the page is the falloff rather than the hot core — the
+       difference between light spilling in and an orange bar. */
+    background:
+      radial-gradient(
+        52% 58% at 50% -22%,
+        color-mix(in oklab, var(--color-ember) 15%, transparent) 0%,
+        transparent 74%
+      ),
+      radial-gradient(
+        96% 72% at 50% -34%,
+        color-mix(in oklab, var(--color-ember) 6%, transparent) 0%,
+        transparent 78%
+      );
+  }
+
+  /* Two soft beams raked out of the same source. Kept to a pair — a fan
+     of them starts to read as a graphic rather than as light. */
+  .top-beam {
+    position: absolute;
+    top: -14rem;
+    left: 50%;
+    width: 28rem;
+    height: 62rem;
+    pointer-events: none;
+    transform-origin: 50% 0%;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-ember) 7%, transparent) 0%,
+      transparent 62%
+    );
+    filter: blur(46px);
+  }
+
+  /* Faint vertical rules, faded off with a mask so they never reach a
+     hard edge. Texture, not a grid you are meant to read. */
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-edge) 62%, transparent) 0 1px,
+      transparent 1px 11.5rem
+    );
+    -webkit-mask-image: radial-gradient(64% 58% at 50% 4%, #000 0%, transparent 78%);
+    mask-image: radial-gradient(64% 58% at 50% 4%, #000 0%, transparent 78%);
+  }
+
+  /* ---- Misc ------------------------------------------------------ */
+
+  /* Horizontal rail. Native overflow does the scrolling — which is
+     what keeps it keyboard- and screen-reader-navigable — and the
+     pointer drag on top only nudges scrollLeft. The bar itself is
+     hidden because the cards already bleed off the edge as an
+     affordance. */
+  .rail {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-edge) 0%, transparent 100%);
+  }
+
+  /* Split-text lines are revealed by GSAP; without this they would
+     flash at full opacity before the timeline takes over. */
+  .split-hidden {
+    visibility: hidden;
+  }
+
+  .noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---- Accessibility --------------------------------------------
+   Three independent signals, per Apple's guidance. Reduced motion
+   means gentler, not absent — comprehension-carrying transitions
+   stay, movement goes. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .streak {
+    display: none;
+  }
+
+  .top-beam {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--color-lacquer);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .panel,
+  .glass {
+    border-color: var(--color-steel);
+  }
+
+  .lede,
+  .body-sm {
+    color: var(--color-chrome);
+  }
+
+  .mono,
+  .mono-sm {
+    color: var(--color-steel);
+  }
+}
+
+/* ---- Progressive enhancement switches --------------------------
+   Deliberately unlayered. Tailwind's utilities live in @layer
+   utilities, and unlayered rules outrank every layer — which is what
+   lets these beat the `md:hidden` / `hidden md:block` pair without a
+   pile of !important. */
+
+[data-reduce="true"] .pin-scene {
+  display: none;
+}
+
+[data-reduce="true"] .pin-list {
+  display: grid;
+}
+
+/* The layer stack's 300vh track only exists to give the scrub something
+   to scrub. With motion reduced the diagram is drawn already exploded,
+   so that track would be 2700px of empty scrolling for the people least
+   likely to want it. */
+@media (prefers-reduced-motion: reduce) {
+  .stack-track {
+    height: auto;
+  }
+
+  .stack-sticky {
+    position: static;
+    min-height: 0;
+  }
+}
