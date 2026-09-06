@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Manrope, IBM_Plex_Mono } from "next/font/google";
 import { shop } from "@/lib/content";
 import "./globals.css";
+import DemoNotice from "@/components/DemoNotice";
 
 /* Space Grotesk carries the display voice — engineered, slightly odd,
    the right amount of workshop in it. Manrope handles body copy at the
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
+        <DemoNotice brand="AutoFutex" />
         {children}
       </body>
     </html>
