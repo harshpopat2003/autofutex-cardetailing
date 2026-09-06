@@ -13,17 +13,41 @@
    different palettes without being tuned for any of them.
 ------------------------------------------------------------------ */
 
+/* Registering the height makes it an animatable <length> rather than an
+   opaque token. That is what lets one transition on <html> carry the
+   body's padding and the site's own fixed header away together when
+   the notice is closed — neither of them needs a transition of its
+   own, which matters because the headers here already spend their
+   `transition-property` on colour and blur. */
+@property --auren-demo-h {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 :global(:root) {
+  --auren-demo-bar: 44px;
   --auren-demo-h: 44px;
   /* The drawer curve: quick to leave, long to settle. Used in both
      directions so the panel returns along the path it arrived on. */
   --auren-demo-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  transition-property: --auren-demo-h;
+  transition-duration: 380ms;
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (min-width: 640px) {
   :global(:root) {
+    --auren-demo-bar: 40px;
     --auren-demo-h: 40px;
   }
+}
+
+/* Closed: the page takes its strip back, in step with the bar leaving
+   through the top edge. */
+:global(html[data-auren-demo="closed"]) {
+  --auren-demo-h: 0px;
 }
 
 /* Room for the bar. Qualified with `html` so it outranks the site's
@@ -70,7 +94,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: var(--auren-demo-h);
+  /* Its own height, not the page's: the bar leaves by sliding out, and
+     a bar whose height animated to zero would squash its contents on
+     the way. */
+  height: var(--auren-demo-bar);
   padding-left: max(12px, env(safe-area-inset-left));
   padding-right: max(10px, env(safe-area-inset-right));
 
@@ -84,6 +111,26 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.11),
     0 10px 30px -18px rgba(0, 0, 0, 0.9);
+
+  transition:
+    transform 380ms var(--auren-demo-ease),
+    opacity 220ms var(--auren-demo-ease);
+}
+
+/* It exits through the edge it is anchored to, and the page closes the
+   gap behind it on the same curve. */
+.root[data-closed] {
+  pointer-events: none;
+}
+
+.root[data-closed] .bar {
+  transform: translateY(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 380ms var(--auren-demo-ease),
+    opacity 220ms var(--auren-demo-ease),
+    visibility 0s linear 380ms;
 }
 
 .badge {
@@ -139,6 +186,13 @@
   }
 }
 
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .action {
   position: relative;
   flex: none;
@@ -184,6 +238,11 @@
 .action:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.75);
   outline-offset: 2px;
+}
+
+/* Icon only, so it wants the padding of a square rather than a pill. */
+.close {
+  padding: 0 6px;
 }
 
 .chevron {
@@ -321,6 +380,18 @@
 
 /* Reduced motion still gets feedback — just no travel and no scale. */
 @media (prefers-reduced-motion: reduce) {
+  :global(:root) {
+    transition-property: none;
+  }
+
+  .bar,
+  .root[data-closed] .bar {
+    transform: none;
+    transition:
+      opacity 140ms ease,
+      visibility 0s linear 140ms;
+  }
+
   .panel {
     transform: none;
     -webkit-backdrop-filter: blur(30px) saturate(180%);

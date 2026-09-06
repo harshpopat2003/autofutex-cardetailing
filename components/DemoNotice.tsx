@@ -17,12 +17,13 @@ const STUDIO = "The Auren Studio";
  * The bar itself is deliberately one line — the full notice lives in a
  * disclosure that opens from the button that asked for it, so the
  * legal detail is one tap away rather than four lines of chrome on
- * every screen. Nothing here reflows the page after first paint: the
- * height is fixed in CSS, and the panel is absolutely positioned, so
- * scroll-driven work already running on the page is never invalidated.
+ * every screen. Closing it puts the page back exactly as it would have
+ * been without the bar; it returns on the next load, which is the
+ * point of a notice.
  */
 export default function DemoNotice({ brand }: { brand: string }) {
   const [open, setOpen] = useState(false);
+  const [closed, setClosed] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
@@ -48,6 +49,33 @@ export default function DemoNotice({ brand }: { brand: string }) {
     };
   }, [open]);
 
+  /* Closing hands the page back the strip it was lending us. The height
+     lives in a registered custom property on <html>, so setting it to
+     zero animates the body's padding and the site's own fixed header
+     together, off one transition, without this component knowing
+     anything about the header.
+
+     The page is a different height afterwards, so anything that
+     measured the document on load — pinned scroll scenes, smooth-scroll
+     engines — has to measure again. A resize event is the one signal
+     every library of that kind already listens for, and it goes out
+     once the motion has settled rather than during it. */
+  useEffect(() => {
+    if (!closed) return;
+
+    const el = document.documentElement;
+    el.setAttribute("data-auren-demo", "closed");
+
+    const settled = window.setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 440);
+
+    return () => {
+      window.clearTimeout(settled);
+      el.removeAttribute("data-auren-demo");
+    };
+  }, [closed]);
+
   const mailto =
     `mailto:${EMAIL}` +
     `?subject=${encodeURIComponent(`Demo site enquiry — ${brand}`)}` +
@@ -56,7 +84,12 @@ export default function DemoNotice({ brand }: { brand: string }) {
     )}`;
 
   return (
-    <div ref={root} className={styles.root}>
+    <div
+      ref={root}
+      className={styles.root}
+      data-closed={closed || undefined}
+      inert={closed}
+    >
       <aside className={styles.bar} aria-label="Demo site notice">
         <span className={styles.badge}>Demo</span>
 
@@ -70,34 +103,63 @@ export default function DemoNotice({ brand }: { brand: string }) {
           </span>
         </p>
 
-        <button
-          type="button"
-          className={styles.action}
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls={panelId}
-        >
-          <span className={styles.actionLabel}>Details</span>
-          {/* The chevron points where the panel will come from, and turns
-              to point back the way it leaves. */}
-          <svg
-            className={styles.chevron}
-            viewBox="0 0 12 12"
-            width="11"
-            height="11"
-            aria-hidden="true"
-            focusable="false"
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.action}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls={panelId}
           >
-            <path
-              d="M2.5 4.5 6 8l3.5-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            <span className={styles.actionLabel}>Details</span>
+            {/* The chevron points where the panel will come from, and
+                turns to point back the way it leaves. */}
+            <svg
+              className={styles.chevron}
+              viewBox="0 0 12 12"
+              width="11"
+              height="11"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M2.5 4.5 6 8l3.5-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            className={`${styles.action} ${styles.close}`}
+            onClick={() => {
+              setOpen(false);
+              setClosed(true);
+            }}
+            aria-label="Close this notice"
+            title="Close this notice"
+          >
+            <svg
+              viewBox="0 0 12 12"
+              width="11"
+              height="11"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M3 3 9 9M9 3 3 9"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
       </aside>
 
       <div
